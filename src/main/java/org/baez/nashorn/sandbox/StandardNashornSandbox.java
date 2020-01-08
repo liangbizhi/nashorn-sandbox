@@ -1,6 +1,7 @@
 package org.baez.nashorn.sandbox;
 
 import jdk.nashorn.api.scripting.NashornScriptEngineFactory;
+import org.baez.nashorn.sandbox.defender.ScriptInterruptor;
 import org.baez.nashorn.sandbox.extinguisher.EngineFunctionExtinguisher;
 import org.baez.nashorn.sandbox.extinguisher.EngineObjectExtinguisher;
 import org.baez.nashorn.sandbox.extinguisher.ScriptExtinguisher;
@@ -45,18 +46,22 @@ public class StandardNashornSandbox implements NashornSandbox {
         scriptExtinguishers.add(new EngineFunctionExtinguisher(scriptEngine));
     }
 
+    @Override
     public void allow(Class<?> clazz) {
         classFilter.add(clazz);
     }
 
+    @Override
     public void setMaxCPUTime(long limit) {
         this.maxCPUTime = limit;
     }
 
+    @Override
     public void setMaxMemory(long limit) {
         this.maxMemory = limit;
     }
 
+    @Override
     public void setExecutor(ExecutorService executor) {
         this.executorService = executor;
     }

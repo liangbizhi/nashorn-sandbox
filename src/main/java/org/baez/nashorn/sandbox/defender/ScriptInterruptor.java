@@ -1,4 +1,4 @@
-package org.baez.nashorn.sandbox;
+package org.baez.nashorn.sandbox.defender;
 
 /**
  * JavaScript中可以使用的类，用来判断当前脚本线程是否被中断
