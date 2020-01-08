@@ -3,9 +3,8 @@ package org.baez.nashorn.sandbox;
 import org.junit.Before;
 import org.junit.Test;
 
-import javax.script.ScriptException;
-
-import static org.junit.Assert.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * 沙箱基本测试
@@ -23,9 +22,20 @@ public class StandardNashornSandboxTest {
     }
 
     @Test
-    public void testEval() throws ScriptException {
+    public void testEval() throws Exception {
         String script = getScript();
         nashornSandbox.eval(script);
+    }
+
+    @Test
+    public void testEvalWithLimit() throws Exception {
+        ExecutorService executorService = Executors.newFixedThreadPool(3);
+        // s
+        nashornSandbox.setMaxCPUTime(10 * 1000);
+        // MB
+        nashornSandbox.setMaxMemory(100 * 1024 * 1024);
+        nashornSandbox.setExecutor(executorService);
+        nashornSandbox.eval("while(true) {  }");
     }
 
     private String getScript() {

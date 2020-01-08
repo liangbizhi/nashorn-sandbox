@@ -1,5 +1,6 @@
 package org.baez.nashorn.sandbox.defender;
 
+import javax.script.ScriptEngine;
 import javax.script.ScriptException;
 
 /**
@@ -16,4 +17,10 @@ public interface ScriptDefender {
      * @throws ScriptException ScriptException
      */
     String defend(String originalScript) throws ScriptException;
+
+    /**
+     * defend {@link ScriptEngine}
+     * @param scriptEngine ScriptEngine
+     */
+    void defend(ScriptEngine scriptEngine);
 }

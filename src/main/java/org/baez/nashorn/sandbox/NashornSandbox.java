@@ -1,6 +1,5 @@
 package org.baez.nashorn.sandbox;
 
-import javax.script.Bindings;
 import javax.script.ScriptException;
 import java.util.concurrent.ExecutorService;
 
@@ -21,15 +20,15 @@ public interface NashornSandbox {
      * in milliseconds
      *
      * <p>当{@code maxCPUTime > 0}，需要设置{@link #setExecutor(ExecutorService)}
-     * @param limit
+     * @param milliseconds
      */
-    void setMaxCPUTime(long limit);
+    void setMaxCPUTime(long milliseconds);
 
     /**
-     * in bytes
-     * @param limit
+     * 单位：byte，如果使用binding，酌情设置大一点
+     * @param bytes
      */
-    void setMaxMemory(long limit);
+    void setMaxMemory(long bytes);
 
     /**
      *
@@ -38,19 +37,12 @@ public interface NashornSandbox {
     void setExecutor(ExecutorService executor);
 
     /**
-     *
-     * @param script
+     * 执行脚本
+     * @param script 符合语法的script脚本
      * @return
-     * @throws ScriptException
+     * @throws ScriptException 脚本异常
+     * @throws InterruptedException 线程中断异常
+     * @throws Exception 其他异常
      */
-    Object eval(String script) throws ScriptException;
-
-    /**
-     *
-     * @param script
-     * @param bindings
-     * @return
-     * @throws ScriptException
-     */
-    Object eval(String script, Bindings bindings) throws ScriptException;
+    Object eval(String script) throws Exception;
 }

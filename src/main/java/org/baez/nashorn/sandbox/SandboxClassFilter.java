@@ -17,6 +17,7 @@ public class SandboxClassFilter implements ClassFilter {
 
     private final Set<String> allowedClassNameSet;
 
+    @Override
     public boolean exposeToScripts(String className) {
         return allowedClassNameSet.contains(className);
     }

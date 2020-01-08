@@ -1,16 +1,21 @@
 package org.baez.nashorn.sandbox;
 
 import jdk.nashorn.api.scripting.NashornScriptEngineFactory;
+import org.baez.nashorn.sandbox.defender.InterruptibleScriptDefender;
+import org.baez.nashorn.sandbox.defender.PreambleScriptDefender;
+import org.baez.nashorn.sandbox.defender.ScriptDefender;
 import org.baez.nashorn.sandbox.defender.ScriptInterruptor;
+import org.baez.nashorn.sandbox.exception.ScriptCPUAbuseException;
+import org.baez.nashorn.sandbox.exception.ScriptMemoryAbuseException;
 import org.baez.nashorn.sandbox.extinguisher.EngineFunctionExtinguisher;
 import org.baez.nashorn.sandbox.extinguisher.EngineObjectExtinguisher;
 import org.baez.nashorn.sandbox.extinguisher.ScriptExtinguisher;
 
-import javax.script.Bindings;
 import javax.script.ScriptEngine;
 import javax.script.ScriptException;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 
 /**
@@ -29,6 +34,8 @@ public class StandardNashornSandbox implements NashornSandbox {
 
     private List<ScriptExtinguisher> scriptExtinguishers;
 
+    private List<ScriptDefender> scriptDefenders;
+
     private long maxCPUTime;
 
     private long maxMemory;
@@ -37,7 +44,14 @@ public class StandardNashornSandbox implements NashornSandbox {
         this.classFilter = new SandboxClassFilter();
         this.scriptEngine = new NashornScriptEngineFactory().getScriptEngine(classFilter);
         registerScriptExtinguishers(this.scriptEngine);
+        registerScriptDefenders();
         this.allow(ScriptInterruptor.class);
+    }
+
+    private void registerScriptDefenders() {
+        scriptDefenders = new LinkedList<>();
+        scriptDefenders.add(new InterruptibleScriptDefender());
+        scriptDefenders.add(new PreambleScriptDefender());
     }
 
     private void registerScriptExtinguishers(ScriptEngine scriptEngine) {
@@ -52,13 +66,13 @@ public class StandardNashornSandbox implements NashornSandbox {
     }
 
     @Override
-    public void setMaxCPUTime(long limit) {
-        this.maxCPUTime = limit;
+    public void setMaxCPUTime(long milliseconds) {
+        this.maxCPUTime = milliseconds;
     }
 
     @Override
-    public void setMaxMemory(long limit) {
-        this.maxMemory = limit;
+    public void setMaxMemory(long bytes) {
+        this.maxMemory = bytes;
     }
 
     @Override
@@ -67,14 +81,45 @@ public class StandardNashornSandbox implements NashornSandbox {
     }
 
     @Override
-    public Object eval(String script, Bindings bindings) throws ScriptException {
-        return scriptEngine.eval(script, bindings);
+    public Object eval(String script) throws Exception {
+        if (maxCPUTime == 0 && maxMemory == 0) {
+            return scriptEngine.eval(script);
+        }
+        checkExecutorPresence();
+        applyScriptExtinguishers();
+        String defendedScript = applyScriptDefenders(scriptEngine, script);
+        SandboxThread sandboxThread = new SandboxThread(scriptEngine, defendedScript, maxCPUTime, maxMemory);
+        executorService.execute(sandboxThread);
+        sandboxThread.monitoring();
+
+        if (sandboxThread.isCpuTimeExceeded()) {
+            throw new ScriptCPUAbuseException(String.format("Script runs for %sms, used more than %sms of CPU time.",
+                    sandboxThread.getCpuRuntime(),
+                    maxCPUTime));
+        } else if (sandboxThread.isMemoryExceeded()) {
+            throw new ScriptMemoryAbuseException(String.format("Script allocates %s bytes for memory, used more than %s bytes.",
+                    sandboxThread.getAllocatedMemory(),
+                    maxMemory));
+        }
+        if (Objects.nonNull(sandboxThread.getException())) {
+            throw sandboxThread.getException();
+        }
+        return sandboxThread.getResult();
     }
 
-    @Override
-    public Object eval(String script) throws ScriptException {
-        applyScriptExtinguishers();
-        return scriptEngine.eval(script);
+    private void checkExecutorPresence() {
+        if (Objects.isNull(executorService)) {
+            throw new IllegalStateException("When a max CPU time or max Memory limit is set, an executor needs to be provided by calling #setExecutor method");
+        }
+    }
+
+    private String applyScriptDefenders(ScriptEngine scriptEngine, String script) throws ScriptException {
+        String defendedScript = script;
+        for (ScriptDefender scriptDefender : scriptDefenders) {
+             defendedScript = scriptDefender.defend(defendedScript);
+             scriptDefender.defend(scriptEngine);
+        }
+        return defendedScript;
     }
 
     private void applyScriptExtinguishers() {

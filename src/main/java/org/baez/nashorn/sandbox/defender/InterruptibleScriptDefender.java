@@ -19,9 +19,9 @@ import java.util.Objects;
  * @author baez
  * @date 2020-01-05 23:21
  */
-public class InterruptibleScriptDefender implements ScriptDefender {
+public class InterruptibleScriptDefender extends AbstractScriptDefender {
 
-    private static final String INTERRUPTOR_SCRIPT_SNIPPET = " __i031__();";
+    private static final String INTERRUPTOR_SCRIPT_SNIPPET = " " + INTERRUPTOR_FUNCTION + "();";
 
     private static final String OPEN_BRACE = "{";
 
