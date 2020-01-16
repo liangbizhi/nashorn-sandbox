@@ -1,5 +1,6 @@
 package org.baez.nashorn.sandbox.defender;
 
+import javax.script.Bindings;
 import javax.script.ScriptEngine;
 import javax.script.ScriptException;
 
@@ -16,11 +17,15 @@ public interface ScriptDefender {
      * @return much safer script
      * @throws ScriptException ScriptException
      */
-    String defend(String originalScript) throws ScriptException;
+    default String defend(String originalScript) throws ScriptException {
+        return originalScript;
+    }
 
     /**
-     * defend {@link ScriptEngine}
-     * @param scriptEngine ScriptEngine
+     * defend {@link Bindings}
+     * @param bindings Bindings
      */
-    void defend(ScriptEngine scriptEngine);
+    default void defend(Bindings bindings) {
+
+    }
 }

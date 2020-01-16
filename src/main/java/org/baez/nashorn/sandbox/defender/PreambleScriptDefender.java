@@ -3,10 +3,7 @@ package org.baez.nashorn.sandbox.defender;
 import org.baez.nashorn.sandbox.debug.StandardConsole;
 
 import javax.script.Bindings;
-import javax.script.ScriptEngine;
 import javax.script.ScriptException;
-
-import static javax.script.ScriptContext.ENGINE_SCOPE;
 
 /**
  * 填写描述
@@ -17,10 +14,8 @@ import static javax.script.ScriptContext.ENGINE_SCOPE;
 public class PreambleScriptDefender extends AbstractScriptDefender {
 
     @Override
-    public void defend(ScriptEngine scriptEngine) {
-        Bindings bindings = scriptEngine.getBindings(ENGINE_SCOPE);
+    public void defend(Bindings bindings) {
         bindings.put("console", new StandardConsole());
-        scriptEngine.setBindings(bindings, ENGINE_SCOPE);
     }
 
     @Override

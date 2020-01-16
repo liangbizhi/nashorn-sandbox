@@ -1,5 +1,7 @@
 package org.baez.nashorn.sandbox.extinguisher;
 
+import javax.script.Bindings;
+
 /**
  * script灭火器……
  *
@@ -9,6 +11,7 @@ package org.baez.nashorn.sandbox.extinguisher;
 public interface ScriptExtinguisher {
     /**
      * 消除安全隐患
+     * @param bindings
      */
-    void extinguish();
+    void apply(Bindings bindings);
 }

@@ -7,15 +7,15 @@ import org.baez.nashorn.sandbox.defender.ScriptDefender;
 import org.baez.nashorn.sandbox.defender.ScriptInterruptor;
 import org.baez.nashorn.sandbox.exception.ScriptCPUAbuseException;
 import org.baez.nashorn.sandbox.exception.ScriptMemoryAbuseException;
-import org.baez.nashorn.sandbox.extinguisher.EngineFunctionExtinguisher;
-import org.baez.nashorn.sandbox.extinguisher.EngineObjectExtinguisher;
-import org.baez.nashorn.sandbox.extinguisher.ScriptExtinguisher;
+import org.baez.nashorn.sandbox.extinguisher.BindingsScriptExtinguisher;
 
 import javax.script.*;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ExecutorService;
+
+import static javax.script.ScriptContext.ENGINE_SCOPE;
 
 /**
  * 沙箱具体实现
@@ -31,10 +31,6 @@ public class StandardNashornSandbox implements NashornSandbox {
 
     private ExecutorService executorService;
 
-    private List<ScriptExtinguisher> scriptExtinguishers;
-
-    private List<ScriptDefender> scriptDefenders;
-
     private long maxCPUTime;
 
     private long maxMemory;
@@ -42,21 +38,7 @@ public class StandardNashornSandbox implements NashornSandbox {
     public StandardNashornSandbox() {
         this.classFilter = new SandboxClassFilter();
         this.scriptEngine = new NashornScriptEngineFactory().getScriptEngine(classFilter);
-        registerScriptExtinguishers(this.scriptEngine);
-        registerScriptDefenders();
         this.allow(ScriptInterruptor.class);
-    }
-
-    private void registerScriptDefenders() {
-        scriptDefenders = new LinkedList<>();
-        scriptDefenders.add(new InterruptibleScriptDefender());
-        scriptDefenders.add(new PreambleScriptDefender());
-    }
-
-    private void registerScriptExtinguishers(ScriptEngine scriptEngine) {
-        scriptExtinguishers = new LinkedList<>();
-        scriptExtinguishers.add(new EngineObjectExtinguisher(scriptEngine));
-        scriptExtinguishers.add(new EngineFunctionExtinguisher(scriptEngine));
     }
 
     @Override
@@ -81,10 +63,22 @@ public class StandardNashornSandbox implements NashornSandbox {
 
     @Override
     public Object eval(String script) throws Exception {
-        applyScriptExtinguishers();
-        String defendedScript = applyScriptDefenders(scriptEngine, script);
+        return eval(script, null);
+    }
+
+    @Override
+    public Object eval(String script, ScriptContext scriptContext) throws Exception {
+        Bindings bindings;
+        if (Objects.isNull(scriptContext)) {
+            scriptContext = scriptEngine.getContext();
+            bindings = scriptEngine.getBindings(ENGINE_SCOPE);
+        } else {
+            bindings = scriptContext.getBindings(ENGINE_SCOPE);
+        }
+        applyScriptExtinguishers(bindings);
+        String defendedScript = applyScriptDefenders(bindings, script);
         if (maxCPUTime == 0 && maxMemory == 0) {
-            return scriptEngine.eval(defendedScript);
+            return scriptEngine.eval(defendedScript, scriptContext);
         }
         checkExecutorPresence();
         SandboxThread sandboxThread = new SandboxThread(scriptEngine, defendedScript, maxCPUTime, maxMemory);
@@ -107,11 +101,6 @@ public class StandardNashornSandbox implements NashornSandbox {
     }
 
     @Override
-    public Object eval(String script, ScriptContext scriptContext) throws Exception {
-        return null;
-    }
-
-    @Override
     public CompiledScript compile(String script) throws ScriptException {
         return ((Compilable) scriptEngine).compile(script);
     }
@@ -122,16 +111,19 @@ public class StandardNashornSandbox implements NashornSandbox {
         }
     }
 
-    private String applyScriptDefenders(ScriptEngine scriptEngine, String script) throws ScriptException {
+    private String applyScriptDefenders(Bindings bindings, String script) throws ScriptException {
+        List<ScriptDefender> scriptDefenders = new ArrayList<>(2);
+        scriptDefenders.add(new InterruptibleScriptDefender());
+        scriptDefenders.add(new PreambleScriptDefender());
         String defendedScript = script;
         for (ScriptDefender scriptDefender : scriptDefenders) {
              defendedScript = scriptDefender.defend(defendedScript);
-             scriptDefender.defend(scriptEngine);
+             scriptDefender.defend(bindings);
         }
         return defendedScript;
     }
 
-    private void applyScriptExtinguishers() {
-        scriptExtinguishers.forEach(ScriptExtinguisher::extinguish);
+    private void applyScriptExtinguishers(Bindings bindings) {
+        new BindingsScriptExtinguisher().apply(bindings);
     }
 }
