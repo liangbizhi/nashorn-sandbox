@@ -1,10 +1,15 @@
 package org.baez.nashorn.sandbox;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import javax.script.CompiledScript;
+import javax.script.ScriptContext;
+import javax.script.ScriptException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 沙箱基本测试
@@ -16,9 +21,17 @@ public class StandardNashornSandboxTest {
 
     private StandardNashornSandbox nashornSandbox;
 
+    private ExecutorService executorService;
+
     @Before
     public void setUp() throws Exception {
         nashornSandbox = new StandardNashornSandbox();
+        executorService = Executors.newFixedThreadPool(3);
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        executorService.shutdown();
     }
 
     @Test
@@ -29,13 +42,33 @@ public class StandardNashornSandboxTest {
 
     @Test
     public void testEvalWithLimit() throws Exception {
-        ExecutorService executorService = Executors.newFixedThreadPool(3);
         // s
         nashornSandbox.setMaxCPUTime(10 * 1000);
         // MB
         nashornSandbox.setMaxMemory(100 * 1024 * 1024);
         nashornSandbox.setExecutor(executorService);
         nashornSandbox.eval("while(true) {  }");
+    }
+
+    @Test
+    public void testMultiThread() throws InterruptedException {
+        for (int i = 0; i < 30; i++) {
+            executorService.execute(() -> {
+                ScriptContext scriptContext = nashornSandbox.createScriptContext();
+                try {
+                    nashornSandbox.eval("var j = 0; for (var i = 0; i < 100; i++) { j++ } console.log('j=' + j)", scriptContext);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            });
+        }
+        TimeUnit.SECONDS.sleep(10);
+    }
+
+    @Test
+    public void testCompile() throws ScriptException {
+        CompiledScript compiledScript = nashornSandbox.compile("var j = 0; for (var i = 0; i < 100; i++) { j++ }");
+        compiledScript.eval();
     }
 
     private String getScript() {

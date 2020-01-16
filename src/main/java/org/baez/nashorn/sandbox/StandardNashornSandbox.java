@@ -62,6 +62,14 @@ public class StandardNashornSandbox implements NashornSandbox {
     }
 
     @Override
+    public ScriptContext createScriptContext() {
+        SimpleScriptContext simpleScriptContext = new SimpleScriptContext();
+        Bindings bindings = scriptEngine.createBindings();
+        simpleScriptContext.setBindings(bindings, ENGINE_SCOPE);
+        return simpleScriptContext;
+    }
+
+    @Override
     public Object eval(String script) throws Exception {
         return eval(script, null);
     }

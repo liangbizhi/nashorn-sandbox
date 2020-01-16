@@ -39,6 +39,12 @@ public interface NashornSandbox {
     void setExecutor(ExecutorService executor);
 
     /**
+     * Return a brand new {@link ScriptContext}
+     * @return
+     */
+    ScriptContext createScriptContext();
+
+    /**
      * 执行脚本
      * @param script 符合语法的script脚本
      * @return
