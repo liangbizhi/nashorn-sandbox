@@ -1,5 +1,7 @@
 package org.baez.nashorn.sandbox;
 
+import javax.script.CompiledScript;
+import javax.script.ScriptContext;
 import javax.script.ScriptException;
 import java.util.concurrent.ExecutorService;
 
@@ -45,4 +47,21 @@ public interface NashornSandbox {
      * @throws Exception 其他异常
      */
     Object eval(String script) throws Exception;
+
+    /**
+     * 使用{@link ScriptContext}执行脚本
+     * @param script 脚本
+     * @param scriptContext 脚本上下文
+     * @return
+     * @throws Exception
+     */
+    Object eval(String script, ScriptContext scriptContext) throws Exception;
+
+    /**
+     * 编译脚本
+     * @param script 脚本
+     * @return
+     * @throws ScriptException
+     */
+    CompiledScript compile(String script) throws ScriptException;
 }

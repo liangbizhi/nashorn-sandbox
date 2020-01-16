@@ -11,8 +11,7 @@ import org.baez.nashorn.sandbox.extinguisher.EngineFunctionExtinguisher;
 import org.baez.nashorn.sandbox.extinguisher.EngineObjectExtinguisher;
 import org.baez.nashorn.sandbox.extinguisher.ScriptExtinguisher;
 
-import javax.script.ScriptEngine;
-import javax.script.ScriptException;
+import javax.script.*;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
@@ -105,6 +104,16 @@ public class StandardNashornSandbox implements NashornSandbox {
             throw sandboxThread.getException();
         }
         return sandboxThread.getResult();
+    }
+
+    @Override
+    public Object eval(String script, ScriptContext scriptContext) throws Exception {
+        return null;
+    }
+
+    @Override
+    public CompiledScript compile(String script) throws ScriptException {
+        return ((Compilable) scriptEngine).compile(script);
     }
 
     private void checkExecutorPresence() {
