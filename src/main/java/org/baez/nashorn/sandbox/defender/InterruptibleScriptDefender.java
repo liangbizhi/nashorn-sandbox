@@ -48,8 +48,9 @@ public class InterruptibleScriptDefender extends AbstractScriptDefender {
         StringBuilder stringBuilder = new StringBuilder();
         boolean needCloseBrace = false;
         int currentPosition = 0;
-        for (int i = 0; i < interruptorInsertPoints.size(); i++) {
-            InterruptorInsertPoint interruptorInsertPoint = interruptorInsertPoints.get(i);
+        InterruptorInsertPoint lastInterruptorInsertPoint = null;
+        for (InterruptorInsertPoint interruptorInsertPoint : interruptorInsertPoints) {
+            lastInterruptorInsertPoint = interruptorInsertPoint;
             if (needCloseBrace) {
                 stringBuilder.append(CLOSE_BRACE);
             }
@@ -66,11 +67,12 @@ public class InterruptibleScriptDefender extends AbstractScriptDefender {
             currentPosition = interruptorInsertPoint.getHeadEnd();
         }
         // 最后还有一部分脚本代码，如果有则需要拼接完整
-        InterruptorInsertPoint lastInterruptorInsertPoint = interruptorInsertPoints.get(interruptorInsertPoints.size() - 1);
-        int lastPosition = lastInterruptorInsertPoint.getHeadEnd();
+        if (Objects.nonNull(lastInterruptorInsertPoint)) {
+            currentPosition = lastInterruptorInsertPoint.getHeadEnd();
+        }
         int length = originalScript.length();
-        if (lastPosition < length) {
-            String lastCodeSnippet = originalScript.substring(lastPosition, length);
+        if (currentPosition < length) {
+            String lastCodeSnippet = originalScript.substring(currentPosition, length);
             stringBuilder.append(lastCodeSnippet);
         }
         return stringBuilder.toString();

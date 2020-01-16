@@ -23,6 +23,7 @@ public class EngineFunctionExtinguisher extends AbstractScriptExtinguisher {
         bindings.remove("quit");
         bindings.remove("exit");
         bindings.remove("load");
+        bindings.remove("print");
         bindings.remove("loadWithNewGlobal");
         scriptEngine.setBindings(bindings, ENGINE_SCOPE);
     }

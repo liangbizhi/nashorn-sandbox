@@ -82,12 +82,12 @@ public class StandardNashornSandbox implements NashornSandbox {
 
     @Override
     public Object eval(String script) throws Exception {
-        if (maxCPUTime == 0 && maxMemory == 0) {
-            return scriptEngine.eval(script);
-        }
-        checkExecutorPresence();
         applyScriptExtinguishers();
         String defendedScript = applyScriptDefenders(scriptEngine, script);
+        if (maxCPUTime == 0 && maxMemory == 0) {
+            return scriptEngine.eval(defendedScript);
+        }
+        checkExecutorPresence();
         SandboxThread sandboxThread = new SandboxThread(scriptEngine, defendedScript, maxCPUTime, maxMemory);
         executorService.execute(sandboxThread);
         sandboxThread.monitoring();

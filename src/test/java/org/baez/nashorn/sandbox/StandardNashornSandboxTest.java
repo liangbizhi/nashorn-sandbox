@@ -41,30 +41,34 @@ public class StandardNashornSandboxTest {
     private String getScript() {
         StringBuilder builder = new StringBuilder();
 //        builder
-//                .append("print('__noSuchProperty__ object: ' + __noSuchProperty__);")
-//                .append("print('engine object: ' + engine);")
-//                .append("print('context object: ' + context);");
+//                .append("console.log('__noSuchProperty__ object: ' + __noSuchProperty__);")
+//                .append("console.log('engine object: ' + engine);")
+//                .append("console.log('context object: ' + context);");
         // 全局变量，shell模式下存在
 //        builder
-//                .append("print('$ARG object: ' + $ARG);")
-//                .append("print('$ENV object: ' + $ENV);")
-//                .append("print('$EXEC method: ' + $EXEC);")
-//                .append("print('$OPTIONS object: ' + $OPTIONS);")
-//                .append("print('$OUT object: ' + $OUT);")
-//                .append("print('$ERR object: ' + $ERR);")
-//                .append("print('$EXIT object: ' + $EXIT);");
+//                .append("console.log('$ARG object: ' + $ARG);")
+//                .append("console.log('$ENV object: ' + $ENV);")
+//                .append("console.log('$EXEC method: ' + $EXEC);")
+//                .append("console.log('$OPTIONS object: ' + $OPTIONS);")
+//                .append("console.log('$OUT object: ' + $OUT);")
+//                .append("console.log('$ERR object: ' + $ERR);")
+//                .append("console.log('$EXIT object: ' + $EXIT);");
         // nashorn内置方法
         builder
-//                .append("print('quit method: ' + quit);")
-//                .append("print('exit method: ' + exit);")
-                .append("print('print method: ' + print);")
+//                .append("console.log('quit method: ' + quit);")
+//                .append("console.log('exit method: ' + exit);")
+                .append("console.debug('debug: ');")
+                .append("console.log('log: ');")
+                .append("console.info('info: ');")
+                .append("console.error('error: ');")
+//                .append("console.log('print method: ' + print);")
                 // 和stdin、stdout相关的函数
-//                .append("print('echo method: ' + echo);")
-//                .append("print('readLine method: ' + readLine);")
-//                .append("print('readFully method: ' + readFully);")
-//                .append("print('load method: ' + load);")
-//                .append("print('loadWithNewGlobal method: ' + loadWithNewGlobal);")
-                .append("print('Object.bindProperties method: ' + Object.bindProperties);");
+//                .append("console.log('echo method: ' + echo);")
+//                .append("console.log('readLine method: ' + readLine);")
+//                .append("console.log('readFully method: ' + readFully);")
+//                .append("console.log('load method: ' + load);")
+//                .append("console.log('loadWithNewGlobal method: ' + loadWithNewGlobal);")
+                .append("console.log('Object.bindProperties method: ' + Object.bindProperties);");
         return builder.toString();
     }
 }
