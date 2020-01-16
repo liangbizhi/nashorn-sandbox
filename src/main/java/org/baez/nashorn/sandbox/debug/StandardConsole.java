@@ -1,6 +1,7 @@
 package org.baez.nashorn.sandbox.debug;
 
-import java.io.PrintStream;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * console标准实现
@@ -10,49 +11,48 @@ import java.io.PrintStream;
  */
 public class StandardConsole implements Console {
 
-    private final PrintStream LOGGER = System.out;
+    private static final Logger LOGGER = LoggerFactory.getLogger(StandardConsole.class);
 
     @Override
     public void debug(Object... obj) {
-        LOGGER.println(obj);
+        LOGGER.debug("{}", obj);
     }
 
     @Override
     public void debug(String msg, Object... obj) {
         String message = String.format(msg, obj);
-        LOGGER.println(message);
+        LOGGER.debug(message);
     }
 
     @Override
     public void log(Object... obj) {
-        LOGGER.println(obj);
+        info(obj);
     }
 
     @Override
     public void log(String msg, Object... obj) {
-        String message = String.format(msg, obj);
-        LOGGER.println(message);
+        info(msg, obj);
     }
 
     @Override
     public void info(Object... obj) {
-        LOGGER.println(obj);
+        LOGGER.info("{}", obj);
     }
 
     @Override
     public void info(String msg, Object... obj) {
         String message = String.format(msg, obj);
-        LOGGER.println(message);
+        LOGGER.info(message);
     }
 
     @Override
     public void error(Object... obj) {
-        LOGGER.println(obj);
+        LOGGER.error("{}", obj);
     }
 
     @Override
     public void error(String msg, Object... obj) {
         String message = String.format(msg, obj);
-        LOGGER.println(message);
+        LOGGER.error(message);
     }
 }
